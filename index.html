@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Premiere of Our Christmas</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<title>The Premiere of Our Christmas</title>
     <link rel="apple-touch-icon" href="xmas.png">
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
     <style>
@@ -25,6 +27,14 @@
             -webkit-font-smoothing: antialiased;
         }
 
+		/* 讓 Safari 介面更像 App 的秘訣 */
+		html, body {
+			height: -webkit-fill-available; /* 修正 iOS 100vh 的問題 */
+			overflow: hidden; /* 防止頁面亂滾動 */
+			position: fixed; /* 鎖定畫面，增加 App 感 */
+			width: 100%;
+		}
+
         .record-sleeve {
             position: relative;
             width: 100%; max-width: 750px; min-height: 420px;
@@ -37,6 +47,9 @@
             cursor: pointer;
             z-index: 10;
             -webkit-tap-highlight-color: transparent;
+			/* 調整高度，確保在有網址列的情況下也不會被切掉 */
+			height: 85vh; 
+			margin-top: env(safe-area-inset-top); /* 避開瀏海區 */
         }
 
         .vinyl-disc {
@@ -149,14 +162,7 @@
 	<audio id="bg-music" loop preload="auto" playsinline webkit-playsinline>
 		<source src="music.mp3" type="audio/mpeg">
 	</audio>
-	
-	<div id="start-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; transition: opacity 0.8s;">
-    <div style="width: 120px; height: 120px; border: 1px solid var(--accent-gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-        <div style="width: 10px; height: 10px; background: var(--accent-gold); border-radius: 50%;"></div>
-    </div>
-    <p style="font-family: 'Montserrat', sans-serif; letter-spacing: 5px; color: var(--accent-gold); font-size: 12px; margin-bottom: 30px;">RECORD PLAYER READY</p>
-    <button id="start-btn" style="background: transparent; border: 1px solid var(--pen-ink); color: var(--pen-ink); padding: 12px 30px; letter-spacing: 3px; font-family: 'STKaiti', serif; cursor: pointer; border-radius: 30px;">開啟旋律</button>
-</div>
+
 	
     <div class="record-sleeve" id="main-sleeve">
         <div class="vinyl-disc" id="vinyl-target">
@@ -215,14 +221,6 @@
 
 		const music = document.getElementById('bg-music');
 		const vinyl = document.getElementById('vinyl-target');
-		const startOverlay = document.getElementById('start-overlay');
-		const startBtn = document.getElementById('start-btn');
-
-		// 當使用者點擊「開啟旋律」按鈕時
-		startBtn.onclick = function() {
-			startOverlay.style.opacity = '0';
-			setTimeout(() => { startOverlay.style.display = 'none'; }, 800);
-		};
 
 		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
 		vinyl.onclick = function(e) {
