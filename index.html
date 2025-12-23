@@ -46,9 +46,21 @@
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             flex-shrink: 0;
-            animation: spin 20s linear infinite;
-            pointer-events: none;
+            <!--animation: spin 20s linear infinite;-->
+			transition: transform 0.5s ease; /* 停止時平滑一點 */
+			cursor: pointer;
+            pointer-events: auto; /* 重要：讓圓盤可以被點擊 */
         }
+		
+		/* 當加上 playing 類別時才轉動 */
+		.vinyl-disc.playing {
+			animation: spin 15s linear infinite;
+		}
+		
+		/* 暫停時的動畫處理 (選配：可讓它停在當前位置) */
+		.vinyl-paused {
+			animation-play-state: paused;
+		}
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -134,9 +146,11 @@
     </style>
 </head>
 <body>
-
+	<audio id="bg-music" loop>
+		<source src="music.mp3" type="audio/mpeg">
+	</audio>
     <div class="record-sleeve" id="main-sleeve">
-        <div class="vinyl-disc">
+        <div class="vinyl-disc" id="vinyl-target">
             <div class="center-label">
                 <span>TO</span>
                 <div style="width: 5px; height: 5px; background: #000; border-radius: 50%; margin: 6px 0;"></div>
@@ -190,12 +204,33 @@
         const contentBox = document.getElementById('content-box');
         const endBox = document.getElementById('end-box');
 
-        mainSleeve.onclick = function() {
-            if (endBox.style.display === 'block') return;
-            pwHint.innerText = tracks[currentIndex].hint;
-            overlay.style.display = 'flex';
-            setTimeout(() => { pwInput.focus(); }, 300);
-        };
+		const music = document.getElementById('bg-music');
+		const vinyl = document.getElementById('vinyl-target');
+
+		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
+		vinyl.onclick = function(e) {
+			e.stopPropagation(); // 防止點擊唱片時也觸發下方的封套點擊
+			
+			if (music.paused) {
+				music.play();
+				vinyl.classList.add('playing');
+				vinyl.style.animationPlayState = 'running';
+			} else {
+				music.pause();
+				vinyl.style.animationPlayState = 'paused';
+			}
+		};
+
+        // 邏輯 B：點擊整個封套（除了黑膠以外的地方）時 —— 彈出密碼窗
+		mainSleeve.onclick = function(e) {
+			// 如果點擊的是黑膠本人，就不在這邊重複跑彈窗邏輯（看你需求，通常彈窗跟音樂分開比較好）
+			if (e.target === vinyl || vinyl.contains(e.target)) return;
+
+			if (endBox.style.display === 'block') return;
+			pwHint.innerText = tracks[currentIndex].hint;
+			overlay.style.display = 'flex';
+			setTimeout(() => { pwInput.focus(); }, 300);
+		};
 
         pwInput.oninput = function() {
             if (this.value.length === 6) {
