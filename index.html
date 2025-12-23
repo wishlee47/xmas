@@ -207,6 +207,26 @@
 		const music = document.getElementById('bg-music');
 		const vinyl = document.getElementById('vinyl-target');
 
+		// 強力解鎖函數
+		function forceUnlockAudio() {
+			music.play().then(() => {
+				// 播放成功後立刻暫停（除非你想要一進去就播）
+				// 或者是直接讓它開始轉動
+				vinyl.classList.add('playing');
+				vinyl.style.animationPlayState = 'running';
+				
+				// 解鎖成功後，移除這個一次性的監聽器
+				document.removeEventListener('touchstart', forceUnlockAudio);
+				document.removeEventListener('click', forceUnlockAudio);
+			}).catch(error => {
+				console.log("WebApp 音訊解鎖失敗:", error);
+			});
+		}
+
+		// 監聽第一次點擊或觸碰
+		document.addEventListener('touchstart', forceUnlockAudio, { once: true });
+		document.addEventListener('click', forceUnlockAudio, { once: true });
+
 		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
 		vinyl.onclick = function(e) {
 			e.stopPropagation(); // 防止點擊唱片時也觸發下方的封套點擊
