@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="theme-color" content="#1a1815">
 	<title>The Premiere of Our Christmas</title>
     <link rel="apple-touch-icon" href="xmas.png">
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
@@ -250,15 +251,6 @@
         pwInput.oninput = function() {
             if (this.value.length === 6) {
                 if (this.value === tracks[currentIndex].pw) {
-					// --- 關鍵解鎖區 ---
-					// 只要第一次密碼對了，就啟動音樂
-					if (music.paused) {
-						music.play();
-						vinyl.classList.add('playing');
-						vinyl.style.animationPlayState = 'running';
-					}
-					// ----------------
-				
                     overlay.style.display = 'none';
                     const isLast = (currentIndex === tracks.length - 1);
                     this.value = '';
