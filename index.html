@@ -220,24 +220,8 @@
 
 		// 當使用者點擊「開啟旋律」按鈕時
 		startBtn.onclick = function() {
-			// 1. 立即播放音樂（這是 iOS 認可的最強權限操作）
-			music.play().then(() => {
-				// 2. 播放成功後，讓黑膠開始轉動
-				vinyl.classList.add('playing');
-				vinyl.style.animationPlayState = 'running';
-				
-				// 3. 淡出遮罩並移除
-				startOverlay.style.opacity = '0';
-				setTimeout(() => {
-					startOverlay.style.display = 'none';
-				}, 800);
-			}).catch(err => {
-				// 如果失敗，嘗試靜音播放（保險機制）
-				console.log("Audio unlock failed, retrying...");
-				music.muted = true;
-				music.play();
-				startOverlay.style.display = 'none';
-			});
+			startOverlay.style.opacity = '0';
+			setTimeout(() => { startOverlay.style.display = 'none'; }, 800);
 		};
 
 		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
@@ -268,6 +252,15 @@
         pwInput.oninput = function() {
             if (this.value.length === 6) {
                 if (this.value === tracks[currentIndex].pw) {
+					// --- 關鍵解鎖區 ---
+					// 只要第一次密碼對了，就啟動音樂
+					if (music.paused) {
+						music.play();
+						vinyl.classList.add('playing');
+						vinyl.style.animationPlayState = 'running';
+					}
+					// ----------------
+				
                     overlay.style.display = 'none';
                     const isLast = (currentIndex === tracks.length - 1);
                     this.value = '';
