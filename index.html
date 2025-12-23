@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Our Vinyl Record</title>
-    <link href="https://fonts.googleapis.com/css2?family=Long+Cang&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #1a1815;
@@ -18,8 +18,8 @@
             background-color: var(--bg-color);
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box;
-            /* 優先順序：草寫 > iPhone楷體 > 標楷體 */
-            font-family: 'Long Cang', 'STKaiti', 'KaiTi', 'BiauKai', cursive, serif;
+            /* 關鍵：強制使用 iPhone 內建楷體，避免載入延遲 */
+            font-family: 'STKaiti', 'KaiTi', 'BiauKai', 'Apple LiSung', serif;
             color: var(--pen-ink);
             -webkit-font-smoothing: antialiased;
         }
@@ -28,7 +28,7 @@
             position: relative;
             width: 100%; max-width: 750px; min-height: 420px;
             background: var(--card-inner);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex; flex-direction: row; align-items: center;
             padding: 40px;
             box-shadow: 0 40px 80px rgba(0,0,0,0.9);
@@ -45,7 +45,7 @@
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             flex-shrink: 0;
-            animation: spin 15s linear infinite;
+            animation: spin 20s linear infinite;
             pointer-events: none;
         }
 
@@ -69,18 +69,23 @@
 
         .eng-title { 
             font-family: 'Montserrat', sans-serif;
-            font-weight: 600; font-size: 11px; letter-spacing: 3px; 
-            color: var(--accent-gold); margin-bottom: 15px; 
-            border-left: 3px solid var(--accent-gold); padding-left: 12px;
+            font-weight: 600; font-size: 10px; letter-spacing: 4px; 
+            color: var(--accent-gold); margin-bottom: 20px; 
+            border-left: 2px solid var(--accent-gold); padding-left: 12px;
             text-transform: uppercase;
+            opacity: 0.8;
         }
 
         .handwriting { 
-            font-size: 1.6rem; 
-            line-height: 1.6; 
-            letter-spacing: 0.05rem;
+            /* 手寫感補強技術 */
+            font-size: 1.4rem; 
+            line-height: 2; 
+            letter-spacing: 0.1rem;
             min-height: 150px;
-            word-break: break-all;
+            color: rgba(244, 241, 234, 0.9);
+            /* 核心：輕微傾斜模擬人手習慣 */
+            transform: skewX(-2deg);
+            text-shadow: 0.5px 0.5px 1px rgba(255,255,255,0.1);
         }
 
         #password-overlay {
@@ -93,19 +98,19 @@
         }
 
         .password-card {
-            background: #222; padding: 40px 20px; border-radius: 20px; text-align: center;
+            background: #222; padding: 45px 25px; border-radius: 20px; text-align: center;
             border: 1px solid var(--accent-gold); width: 85%; max-width: 300px;
         }
 
         .hint-text { 
-            font-family: 'Long Cang', 'STKaiti', cursive;
             font-size: 1.8rem; color: var(--accent-gold);
-            margin-bottom: 25px; letter-spacing: 0.3rem;
+            margin-bottom: 25px; letter-spacing: 0.5rem;
+            transform: skewX(-3deg); /* 提示文字也傾斜 */
         }
 
         input {
             background: transparent; border: none; border-bottom: 1px solid var(--accent-gold);
-            color: white; font-size: 32px; text-align: center; letter-spacing: 8px;
+            color: white; font-size: 32px; text-align: center; letter-spacing: 10px;
             width: 100%; outline: none; padding: 10px; border-radius: 0;
             font-family: 'Montserrat', sans-serif;
         }
@@ -113,17 +118,17 @@
         #end-box { display: none; text-align: center; width: 100%; margin-left: 0; }
         
         .replay-btn {
-            margin-top: 30px; padding: 10px 20px; background: transparent;
+            margin-top: 40px; padding: 10px 20px; background: transparent;
             border: 1px solid var(--accent-gold); color: var(--accent-gold);
             cursor: pointer; letter-spacing: 3px; font-size: 10px;
             pointer-events: auto; font-family: 'Montserrat', sans-serif;
         }
 
         @media (max-width: 768px) {
-            .record-sleeve { flex-direction: column; padding: 40px 25px; text-align: center; height: auto; }
-            .vinyl-disc { width: 220px; height: 220px; margin-bottom: 30px; }
+            .record-sleeve { flex-direction: column; padding: 50px 30px; text-align: center; height: auto; }
+            .vinyl-disc { width: 230px; height: 230px; margin-bottom: 40px; }
             .text-area { margin-left: 0; width: 100%; }
-            .handwriting { font-size: 1.4rem; }
+            .handwriting { font-size: 1.25rem; line-height: 1.8; }
         }
     </style>
 </head>
@@ -134,12 +139,12 @@
             <div class="center-label">
                 <span>STEREO</span>
                 <div style="width: 5px; height: 5px; background: #000; border-radius: 50%; margin: 6px 0;"></div>
-                <span id="label-track">TRACK 01</span>
+                <span id="label-track">SIDE A</span>
             </div>
         </div>
 
         <div class="text-area" id="content-box">
-            <div class="eng-title" id="track-title">The Long Tour / Track 01</div>
+            <div class="eng-title" id="track-title">CHAPTER 01 / 相識</div>
             <div class="handwriting" id="track-text">
                 生活就像一場長途巡演，<br>
                 在切換到下一個樂章前，<br>
@@ -150,15 +155,18 @@
         </div>
 
         <div class="text-area" id="end-box">
-            <div class="eng-title">Special Hidden Track</div>
-            <div class="handwriting" style="font-size: 1.8rem;">這張唱片，獻給陪伴我巡演的你。<br><br>平安夜快樂。</div>
+            <div class="eng-title">Special Ending</div>
+            <div class="handwriting" style="text-align: center; font-size: 1.6rem;">
+                這張唱片，獻給陪伴我巡演的你。<br><br>
+                <span style="color: var(--accent-gold);">平安夜快樂</span>
+            </div>
             <button class="replay-btn" id="replay-btn">REPLAY ALBUM</button>
         </div>
     </div>
 
     <div id="password-overlay">
         <div class="password-card" id="p-card">
-            <p style="font-size: 10px; opacity: 0.6; letter-spacing: 3px; font-family: 'Montserrat', sans-serif;">ACCESS CODE</p>
+            <p style="font-size: 10px; opacity: 0.6; letter-spacing: 3px; font-family: 'Montserrat', sans-serif;">INPUT CODE</p>
             <div class="hint-text" id="pw-hint">相識</div>
             <input type="tel" id="pw-input" maxlength="6" placeholder="YYMMDD" autocomplete="off">
         </div>
@@ -166,11 +174,11 @@
 
     <script>
         const tracks = [
-            { title: "The Long Tour / Track 01", text: "生活就像一場長途巡演，<br>在切換到下一個樂章前，<br>請先卸下奔波的基調。<br>去看看你每天回家，<br>第一個放下「步伐」的地方。", pw: "250701", hint: "相識" },
-            { title: "Analog Warmth / Track 02", text: "有些溫暖就像經典的類比錄音，<br>總是貼近心臟。<br>它曾在門外為你擋去雜訊與風雨；<br>現在，在那深處的夾層裡，<br>正藏著一段貼心變奏。", pw: "250712", hint: "初見" },
-            { title: "Groove Details / Track 03", text: "尋找那些隱藏在溝槽間的細節。<br>就像音樂不只存在於封面，<br>最動人的旋律，<br>往往需要你親手放下唱針，<br>才能聽見那份共鳴。", pw: "250720", hint: "心動" },
-            { title: "Dream Lullaby / Track 04", text: "當現實的雜音漸漸淡出，<br>夢境的弦樂即將響起。<br>去看看那個每晚承接你所有疲累思緒、<br>陪你進入安眠曲最深處的溫柔支撐。", pw: "250728", hint: "相戀" },
-            { title: "The Final Beat / Track 05", text: "最後一個音符，並非固定在空間裡的陳設。<br>它正隨著一顆永遠支持你、<br>永遠為你心跳鼓掌的靈魂跳動著……", pw: "251224", hint: "今夕" }
+            { title: "CHAPTER 01 / 相識", text: "生活就像一場長途巡演，<br>在切換到下一個樂章前，<br>請先卸下奔波的基調。<br>去看看你每天回家，<br>第一個放下「步伐」的地方。", pw: "250701", hint: "相識" },
+            { title: "CHAPTER 02 / 初見", text: "有些溫暖就像經典的類比錄音，<br>總是貼近心臟。<br>它曾在門外為你擋去雜訊與風雨；<br>現在，在那深處的夾層裡，<br>正藏著一段貼心變奏。", pw: "250712", hint: "初見" },
+            { title: "CHAPTER 03 / 心動", text: "尋找那些隱藏在溝槽間的細節。<br>就像音樂不只存在於封面，<br>最動人的旋律，<br>往往需要你親手放下唱針，<br>才能聽見那份共鳴。", pw: "250720", hint: "心動" },
+            { title: "CHAPTER 04 / 相戀", text: "當現實的雜音漸漸淡出，<br>夢境的弦樂即將響起。<br>去看看那個每晚承接你所有疲累思緒、<br>陪你進入安眠曲最深處的溫柔支撐。", pw: "250728", hint: "相戀" },
+            { title: "CHAPTER 05 / 今夕", text: "最後一個音符，並非固定在空間裡的陳設。<br>它正隨著一顆永遠支持你、<br>永遠為你心跳鼓掌的靈魂跳動著……", pw: "251224", hint: "今夕" }
         ];
 
         let currentIndex = 0;
@@ -209,7 +217,6 @@
                 currentIndex++;
                 document.getElementById('track-title').innerText = tracks[currentIndex].title;
                 document.getElementById('track-text').innerHTML = tracks[currentIndex].text;
-                document.getElementById('label-track').innerText = `TRACK 0${currentIndex + 1}`;
                 contentBox.classList.remove('fade-out');
             }, 500);
         }
@@ -230,7 +237,6 @@
             contentBox.classList.remove('fade-out');
             document.getElementById('track-title').innerText = tracks[0].title;
             document.getElementById('track-text').innerHTML = tracks[0].text;
-            document.getElementById('label-track').innerText = `TRACK 01`;
         };
 
         overlay.onclick = function(e) {
