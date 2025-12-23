@@ -160,6 +160,32 @@
     </style>
 </head>
 <body>
+	<div id="start-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#1a1815; z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; transition: opacity 0.8s, visibility 0.8s;">
+    
+    <div style="width:250px; height:250px; 
+            background-image:url('xmas-title2.png'); 
+            background-size:cover; 
+            background-position:center;
+            border-radius:50%; 
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); 
+            margin-bottom: 40px; 
+            border: 3px solid #b8926a; 
+            position: relative;
+            display: flex; justify-content: center; align-items: center;">
+    
+    <div style="width: 60px; height: 60px; 
+                background: rgba(26, 24, 21, 0.9); /* 深色半透明，看得到一點點底圖 */
+                border-radius: 50%; 
+                border: 1px solid #b8926a;
+                display: flex; justify-content: center; align-items: center;">
+        
+        <div style="width: 8px; height: 8px; background: #b8926a; border-radius: 50%;"></div>
+    </div>
+</div>
+
+    <button id="start-btn" style="background:transparent; border:1px solid #b8926a; color:#b8926a; padding:12px 40px; letter-spacing:5px; font-family:'Montserrat', sans-serif; font-size:14px; cursor:pointer; border-radius:30px; text-transform:uppercase;">Play Record</button>
+</div>
+
 	<audio id="bg-music" loop preload="auto" playsinline webkit-playsinline>
 		<source src="music.mp3" type="audio/mpeg">
 	</audio>
@@ -222,6 +248,22 @@
 
 		const music = document.getElementById('bg-music');
 		const vinyl = document.getElementById('vinyl-target');
+		const startBtn = document.getElementById('start-btn');
+		const startOverlay = document.getElementById('start-overlay');
+
+		// 啟動按鈕邏輯
+		startBtn.onclick = function() {
+			music.play().then(() => {
+				vinyl.classList.add('playing'); // 讓黑膠開始轉
+				startOverlay.style.opacity = '0'; // 封面淡出
+				setTimeout(() => { 
+					startOverlay.style.visibility = 'hidden'; 
+				}, 800);
+			}).catch(err => {
+				console.log("播放失敗，請檢查靜音開關");
+				startOverlay.style.visibility = 'hidden';
+			});
+		};
 
 		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
 		vinyl.onclick = function(e) {
