@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<meta name="theme-color" content="#1a1815">
 	<title>The Premiere of Our Christmas</title>
     <link rel="apple-touch-icon" href="xmas.png">
@@ -253,6 +253,9 @@
 
 		// 啟動按鈕邏輯
 		startBtn.onclick = function() {
+		
+			music.load(); // 強制觸發網絡請求
+			
 			music.play().then(() => {
 				vinyl.classList.add('playing'); // 讓黑膠開始轉
 				startOverlay.style.opacity = '0'; // 封面淡出
@@ -260,8 +263,9 @@
 					startOverlay.style.visibility = 'hidden'; 
 				}, 800);
 			}).catch(err => {
-				console.log("播放失敗，請檢查靜音開關");
-				startOverlay.style.visibility = 'hidden';
+				//console.log("播放失敗，請檢查靜音開關");
+				//startOverlay.style.visibility = 'hidden';
+				startBtn.innerText = "RETRY PLAYING";
 			});
 		};
 
