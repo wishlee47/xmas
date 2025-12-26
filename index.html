@@ -186,7 +186,7 @@
     <button id="start-btn" style="background:transparent; border:1px solid #b8926a; color:#b8926a; padding:12px 40px; letter-spacing:5px; font-family:'Montserrat', sans-serif; font-size:14px; cursor:pointer; border-radius:30px; text-transform:uppercase;">Play Record</button>
 </div>
 
-	<audio id="bg-music" loop preload="auto" playsinline webkit-playsinline>
+	<audio id="bg-music" loop preload="auto" playsinline>
 		<source src="music.mp3" type="audio/mpeg">
 	</audio>
 
@@ -254,19 +254,32 @@
 		// 啟動按鈕邏輯
 		startBtn.onclick = function() {
 		
-			music.load(); // 強制觸發網絡請求
+			// 1. 確保音訊從頭開始，但不重新加載整個文件
+			music.currentTime = 0;
 			
-			music.play().then(() => {
-				vinyl.classList.add('playing'); // 讓黑膠開始轉
-				startOverlay.style.opacity = '0'; // 封面淡出
-				setTimeout(() => { 
-					startOverlay.style.visibility = 'hidden'; 
-				}, 800);
-			}).catch(err => {
-				//console.log("播放失敗，請檢查靜音開關");
-				//startOverlay.style.visibility = 'hidden';
-				startBtn.innerText = "RETRY PLAYING";
-			});
+			// 2. 直接嘗試播放
+			var playPromise = music.play();
+
+			if (playPromise !== undefined) {
+				playPromise.then(() => {
+					// 播放成功
+					vinyl.classList.add('playing');
+					startOverlay.style.opacity = '0';
+					setTimeout(() => { 
+						startOverlay.style.visibility = 'hidden'; 
+					}, 800);
+				}).catch(error => {
+					// 播放失敗 (通常是因為 iOS 認為沒有互動，或是資源被鎖住)
+					console.log("Playback prevented:", error);
+					startBtn.innerText = "TAP AGAIN"; // 提示用戶再點一次
+					
+					// 3. 極端情況下的備案：如果第一次失敗，稍微重置一下 src 讓 iOS 醒過來
+					// 只有在真的報錯時才做這件事
+					if(music.paused) {
+						 music.load(); 
+					}
+				});
+			}
 		};
 
 		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
