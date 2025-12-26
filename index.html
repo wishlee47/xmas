@@ -254,28 +254,37 @@
 		// 啟動按鈕邏輯
 		startBtn.onclick = function() {
 		
-			// 【核心密技】
-            // 1. 先抓出原本的音樂路徑
-            var audioSrc = music.querySelector('source').src; 
-            
-            // 2. 故意把音樂清空，讓 iOS 忘記之前的錯誤狀態
-            music.src = ""; 
-            
-            // 3. 再重新把路徑塞回去，這時 iOS 會把它當作一個全新的請求，並給予最高權限
+			// 1. 取得絕對路徑 (避免相對路徑在重置時出錯)
+            const audioSrc = music.querySelector('source').src;
+    
+            // 2. 徹底重置並重新賦予權限
+            music.pause(); // 先暫停確保狀態乾淨
             music.src = audioSrc; 
-            music.load(); // 因為設為 preload="none"，這裡必須手動 load 一次
+            music.load(); 
 
-            // 4. 開始播放
-            music.play().then(() => {
-                vinyl.classList.add('playing');
-                startOverlay.style.opacity = '0';
-                setTimeout(() => { 
-                    startOverlay.style.visibility = 'hidden'; 
-                }, 800);
-            }).catch(err => {
-                console.log("播放被阻擋: ", err);
-                startBtn.innerText = "CLICK AGAIN"; // 如果真的還是失敗，引導他再點一次
-            });
+            // 3. 執行播放
+            var playPromise = music.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 【重要保險】檢查 currentTime 是否有在跑
+                    // 如果 Promise 成功但音樂沒跑，強制再呼叫一次 play
+                    if (music.paused) {
+                        music.play();
+                    }
+
+                    // 成功後才執行視覺動畫
+                    vinyl.classList.add('playing');
+                    startOverlay.style.opacity = '0';
+                    setTimeout(() => { 
+                        startOverlay.style.visibility = 'hidden'; 
+                    }, 800);
+                }).catch(err => {
+                    console.log("播放被阻擋: ", err);
+                    // 失敗時不要隱藏遮罩，讓按鈕變換文字提醒再點一次
+                    startBtn.innerText = "TAP TO UNMUTE";
+                });
+            }
 		};
 
 		// 邏輯 A：點擊黑膠唱片時 —— 控制轉動與音樂
