@@ -60,7 +60,6 @@
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             flex-shrink: 0;
-            <!--animation: spin 20s linear infinite;-->
 			transition: transform 0.5s ease; /* 停止時平滑一點 */
 			cursor: pointer;
             pointer-events: auto; /* 重要：讓圓盤可以被點擊 */
@@ -167,6 +166,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
+
+            /* 防止選取文字 */
+            -webkit-user-select: none;  /* iOS Safari */
+            user-select: none;          
+            
+            /* 防止長按彈出選單 (iOS 關鍵) */
+            -webkit-touch-callout: none;
         }
 
         /* 修正唱針在包裹層內的位置 */
@@ -182,6 +188,11 @@
             transform: rotate(-45deg);
             transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
+        }
+
+        /* 確保裡面的標籤也不會被抓到文字 */
+        .center-label, .center-label span {
+            pointer-events: none; /* 讓點擊穿透文字，直接由圓盤接收 */
         }
 
         /* 手機版 RWD 修正 (關鍵！) */
@@ -421,11 +432,6 @@
         pwInput.oninput = function() {
             if (this.value.length === 6) {
                 if (this.value === tracks[currentIndex].pw) {
-                    // 加入震動回饋 (iOS 13+ 在加入主畫面後支援較佳)
-                    if (window.navigator && window.navigator.vibrate) {
-                        window.navigator.vibrate(200); 
-                    }
-
                     overlay.style.display = 'none';
                     const isLast = (currentIndex === tracks.length - 1);
                     this.value = '';
@@ -443,11 +449,20 @@
 
         // 長按開始
         vinylTarget.addEventListener('touchstart', (e) => {
+            // 防止手機跳出選取文字或選單
+            if (e.cancelable) e.preventDefault(); 
+
+            // 原本的長按縮小動畫與計時器
+            vinylTarget.style.transition = "transform 0.5s";
+            vinylTarget.style.transform = "scale(0.95)";
+
             pressTimer = setTimeout(() => {
                 createHeartBurst(e.touches[0].clientX, e.touches[0].clientY);
                 if (window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]);
-            }, 1500); // 長按 1.5 秒觸發
-        });
+            }, 1000);
+        }, { passive: false }); // 注意這裡要加 passive: false 才能用 preventDefault
+
+
 
         // 放開或移動則取消
         vinylTarget.addEventListener('touchend', () => clearTimeout(pressTimer));
@@ -457,7 +472,8 @@
         function createHeartBurst(x, y) {
             for (let i = 0; i < 20; i++) {
                 const heart = document.createElement('div');
-                heart.innerHTML = '❤️'; // 也可以換成 '❄️' 或 '🎄'
+                const emojis = ['❤️', '✨', '🎄', '🎁', '❄️'];
+                heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
                 heart.style.position = 'fixed';
                 heart.style.left = x + 'px';
                 heart.style.top = y + 'px';
