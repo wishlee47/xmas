@@ -158,42 +158,76 @@
             .handwriting { font-size: 1.25rem; line-height: 1.8; }
         }
 
-        /* 唱針基礎樣式 */
-.tonearm {
-    position: absolute;
-    top: -10px;    /* 調整到唱片右上方 */
-    right: -30px; 
-    width: 140px; 
-    height: 8px;
-    background: linear-gradient(to bottom, #777, #333, #777);
-    border-radius: 4px;
-    z-index: 100;
-    
-    /* 關鍵：設定旋轉支點在右端 */
-    transform-origin: 90% 50%; 
-    
-    /* 預設狀態：拿起 (未播放) */
-    transform: rotate(-45deg); 
-    
-    /* 讓移動過程平滑 */
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 2px 3px 8px rgba(0,0,0,0.4);
-}
+        /* 新增：包裹層基礎樣式 */
+        .vinyl-wrapper {
+            position: relative;
+            width: 280px; 
+            height: 280px; 
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-/* 播放狀態：放下唱針 */
-.tonearm.playing {
-    transform: rotate(-90deg); 
-}
+        /* 修正唱針在包裹層內的位置 */
+        .tonearm {
+            position: absolute;
+            top: -10px;
+            right: -20px; /* 稍微往內縮一點避免手機版切到 */
+            width: 130px;
+            height: 8px;
+            background: linear-gradient(to bottom, #777, #333, #777);
+            border-radius: 4px;
+            transform-origin: 90% 50%;
+            transform: rotate(-45deg);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
 
-/* 唱針頭部的小細節 */
-.tonearm::before {
-    content: '';
-    position: absolute;
-    left: 0; top: -2px;
-    width: 25px; height: 12px;
-    background: #222;
-    border-radius: 2px;
-}
+        /* 手機版 RWD 修正 (關鍵！) */
+        @media (max-width: 768px) {
+            .record-sleeve { 
+                flex-direction: column; 
+                padding: 50px 30px; 
+                text-align: center; 
+                height: auto; 
+            }
+
+            /* 這裡要調整容器大小，唱片才會在中間 */
+            .vinyl-wrapper {
+                width: 230px;  /* 與手機版唱片大小一致 */
+                height: 230px;
+                margin: 0 auto 40px auto; /* 居中並留出下方間距 */
+            }
+
+            .vinyl-disc { 
+                width: 230px; 
+                height: 230px; 
+                margin-bottom: 0; /* 讓間距由 wrapper 控制 */
+            }
+
+            /* 手機版唱針也要縮小一點點，不然會顯得太大 */
+            .tonearm {
+                width: 100px;
+                top: -5px;
+                right: -15px;
+            }
+        }
+
+        /* 播放狀態：放下唱針 */
+        .tonearm.playing {
+            transform: rotate(-90deg); 
+        }
+
+        /* 唱針頭部的小細節 */
+        .tonearm::before {
+            content: '';
+            position: absolute;
+            left: 0; top: -2px;
+            width: 25px; height: 12px;
+            background: #222;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body>
@@ -229,7 +263,7 @@
 
 	
     <div class="record-sleeve" id="main-sleeve">
-        <div style="position: relative; width: 280px; height: 280px; flex-shrink: 0; margin: 0 auto;">
+        <div class="vinyl-wrapper">
             <div class="tonearm" id="tonearm"></div>
             <div class="vinyl-disc" id="vinyl-target">
                 <div class="center-label">
