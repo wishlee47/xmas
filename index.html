@@ -166,28 +166,44 @@
             display: flex;
             justify-content: center;
             align-items: center;
-
-            /* 防止選取文字 */
-            -webkit-user-select: none;  /* iOS Safari */
-            user-select: none;          
-            
-            /* 防止長按彈出選單 (iOS 關鍵) */
-            -webkit-touch-callout: none;
         }
 
-        /* 修正唱針在包裹層內的位置 */
         .tonearm {
             position: absolute;
-            top: -10px;
-            right: -20px; /* 稍微往內縮一點避免手機版切到 */
-            width: 130px;
-            height: 8px;
-            background: linear-gradient(to bottom, #777, #333, #777);
-            border-radius: 4px;
+            top: 15px;
+            right: -20px;
+            width: 140px;
+            height: 6px; /* 變細一點比較精緻 */
+            
+            /* 金屬絲綢漸層光澤 */
+            background: linear-gradient(to bottom, 
+                #999 0%, 
+                #eee 25%, 
+                #666 50%, 
+                #333 100%
+            );
+            
+            border-radius: 3px;
+            z-index: 100;
             transform-origin: 90% 50%;
             transform: rotate(-45deg);
             transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
+            
+            /* 立體感陰影 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+        }
+
+        /* 唱針頭部（卡匣）- 增加一些層次 */
+        .tonearm::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: -4px;
+            width: 28px;
+            height: 14px;
+            background: linear-gradient(135deg, #222, #444);
+            border-radius: 2px;
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.1);
         }
 
         /* 確保裡面的標籤也不會被抓到文字 */
@@ -219,8 +235,8 @@
 
             /* 手機版唱針也要縮小一點點，不然會顯得太大 */
             .tonearm {
-                width: 100px;
-                top: -5px;
+                width: 110px; /* 稍微縮短一點配合縮小的唱片 */
+                top: 0;
                 right: -15px;
             }
         }
@@ -446,54 +462,6 @@
 
         let pressTimer;
         const vinylTarget = document.getElementById('vinyl-target');
-
-        // 長按開始
-        vinylTarget.addEventListener('touchstart', (e) => {
-            // 防止手機跳出選取文字或選單
-            if (e.cancelable) e.preventDefault(); 
-
-            // 原本的長按縮小動畫與計時器
-            vinylTarget.style.transition = "transform 0.5s";
-            vinylTarget.style.transform = "scale(0.95)";
-
-            pressTimer = setTimeout(() => {
-                createHeartBurst(e.touches[0].clientX, e.touches[0].clientY);
-                if (window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]);
-            }, 1000);
-        }, { passive: false }); // 注意這裡要加 passive: false 才能用 preventDefault
-
-
-
-        // 放開或移動則取消
-        vinylTarget.addEventListener('touchend', () => clearTimeout(pressTimer));
-        vinylTarget.addEventListener('touchmove', () => clearTimeout(pressTimer));
-
-        // 噴發特效函式
-        function createHeartBurst(x, y) {
-            for (let i = 0; i < 20; i++) {
-                const heart = document.createElement('div');
-                const emojis = ['❤️', '✨', '🎄', '🎁', '❄️'];
-                heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
-                heart.style.position = 'fixed';
-                heart.style.left = x + 'px';
-                heart.style.top = y + 'px';
-                heart.style.fontSize = Math.random() * 20 + 10 + 'px';
-                heart.style.transition = 'all 1s ease-out';
-                heart.style.zIndex = '20000';
-                heart.style.pointerEvents = 'none';
-                document.body.appendChild(heart);
-
-                const angle = Math.random() * Math.PI * 2;
-                const velocity = Math.random() * 100 + 50;
-                
-                setTimeout(() => {
-                    heart.style.transform = `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px)`;
-                    heart.style.opacity = '0';
-                }, 50);
-
-                setTimeout(() => heart.remove(), 1000);
-            }
-        }
 
         function changeContent() {
             contentBox.classList.add('fade-out');
