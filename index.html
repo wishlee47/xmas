@@ -157,6 +157,43 @@
             .text-area { margin-left: 0; width: 100%; }
             .handwriting { font-size: 1.25rem; line-height: 1.8; }
         }
+
+        /* 唱針基礎樣式 */
+.tonearm {
+    position: absolute;
+    top: -10px;    /* 調整到唱片右上方 */
+    right: -30px; 
+    width: 140px; 
+    height: 8px;
+    background: linear-gradient(to bottom, #777, #333, #777);
+    border-radius: 4px;
+    z-index: 100;
+    
+    /* 關鍵：設定旋轉支點在右端 */
+    transform-origin: 90% 50%; 
+    
+    /* 預設狀態：拿起 (未播放) */
+    transform: rotate(-45deg); 
+    
+    /* 讓移動過程平滑 */
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.4);
+}
+
+/* 播放狀態：放下唱針 */
+.tonearm.playing {
+    transform: rotate(-90deg); 
+}
+
+/* 唱針頭部的小細節 */
+.tonearm::before {
+    content: '';
+    position: absolute;
+    left: 0; top: -2px;
+    width: 25px; height: 12px;
+    background: #222;
+    border-radius: 2px;
+}
     </style>
 </head>
 <body>
@@ -192,11 +229,14 @@
 
 	
     <div class="record-sleeve" id="main-sleeve">
-        <div class="vinyl-disc" id="vinyl-target">
-            <div class="center-label">
-                <span>TO</span>
-                <div style="width: 5px; height: 5px; background: #000; border-radius: 50%; margin: 6px 0;"></div>
-                <span id="label-track">CHARLES</span>
+        <div style="position: relative; width: 280px; height: 280px; flex-shrink: 0; margin: 0 auto;">
+            <div class="tonearm" id="tonearm"></div>
+            <div class="vinyl-disc" id="vinyl-target">
+                <div class="center-label">
+                    <span>TO</span>
+                    <div style="width: 5px; height: 5px; background: #000; border-radius: 50%; margin: 6px 0;"></div>
+                    <span id="label-track">CHARLES</span>
+                </div>
             </div>
         </div>
 
@@ -254,35 +294,63 @@
 		// 啟動按鈕邏輯
 		startBtn.onclick = function() {
 		
-			// 1. 取得絕對路徑 (避免相對路徑在重置時出錯)
+			// 1. 給點擊回饋，讓他知道有在跑 (避免他以為當機狂按)
+            startBtn.innerText = "LOADING...";
+            startBtn.style.opacity = "0.6";
+            startBtn.disabled = true; // 防止連點
+
+            // 2. 音訊重置邏輯 (維持原本的)
             const audioSrc = music.querySelector('source').src;
-    
-            // 2. 徹底重置並重新賦予權限
-            music.pause(); // 先暫停確保狀態乾淨
             music.src = audioSrc; 
             music.load(); 
 
-            // 3. 執行播放
+            // 3. 定義「進入網站」的函式 (因為有兩個地方會呼叫它)
+            const enterSite = () => {
+                vinyl.classList.add('playing'); // 開始轉動畫
+                startOverlay.style.opacity = '0';
+                setTimeout(() => { 
+                    startOverlay.style.visibility = 'hidden'; 
+                }, 800);
+
+                // 聯動：放下唱針
+                tonearm.classList.remove('playing');
+            };
+
+            // 4. 【關鍵保底】設定一個 2.5 秒的計時器
+            // 如果網路太慢，2.5秒後不管音樂有沒有好，強制開門
+            const safetyTimer = setTimeout(() => {
+                console.log("網路回應太慢，強制進入");
+                enterSite(); 
+            }, 2500);
+
+            // 5. 嘗試播放
             var playPromise = music.play();
 
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    // 【重要保險】檢查 currentTime 是否有在跑
-                    // 如果 Promise 成功但音樂沒跑，強制再呼叫一次 play
-                    if (music.paused) {
-                        music.play();
-                    }
+                    // 如果音樂成功了，趕快取消上面的保底計時器，正常進入
+                    clearTimeout(safetyTimer);
+                    
+                    // 雙重檢查確保真的在播
+                    if (music.paused) music.play();
+                    
+                    enterSite();
 
-                    // 成功後才執行視覺動畫
-                    vinyl.classList.add('playing');
-                    startOverlay.style.opacity = '0';
-                    setTimeout(() => { 
-                        startOverlay.style.visibility = 'hidden'; 
-                    }, 800);
                 }).catch(err => {
-                    console.log("播放被阻擋: ", err);
-                    // 失敗時不要隱藏遮罩，讓按鈕變換文字提醒再點一次
-                    startBtn.innerText = "TAP TO UNMUTE";
+                    // 如果報錯 (例如權限問題)，也取消保底計時器
+                    clearTimeout(safetyTimer);
+                    
+                    console.log("播放失敗:", err);
+                    
+                    // 這裡有兩個選擇：
+                    // 選擇 A (激進派): 失敗也直接讓他進去，反正進去再點唱片也能播
+                    // enterSite(); 
+
+                    // 選擇 B (保守派 - 目前採用): 顯示重試按鈕
+                    // 因為如果是權限被擋，讓他再點一次通常就會好
+                    startBtn.disabled = false;
+                    startBtn.style.opacity = "1";
+                    startBtn.innerText = "TAP TO ENTER"; 
                 });
             }
 		};
@@ -295,9 +363,13 @@
 				music.play();
 				vinyl.classList.add('playing');
 				vinyl.style.animationPlayState = 'running';
+                // 聯動：放下唱針
+                tonearm.classList.remove('playing');
 			} else {
 				music.pause();
 				vinyl.style.animationPlayState = 'paused';
+                // 聯動：拿起唱針
+                tonearm.classList.add('playing');
 			}
 		};
 
@@ -315,6 +387,11 @@
         pwInput.oninput = function() {
             if (this.value.length === 6) {
                 if (this.value === tracks[currentIndex].pw) {
+                    // 加入震動回饋 (iOS 13+ 在加入主畫面後支援較佳)
+                    if (window.navigator && window.navigator.vibrate) {
+                        window.navigator.vibrate(200); 
+                    }
+
                     overlay.style.display = 'none';
                     const isLast = (currentIndex === tracks.length - 1);
                     this.value = '';
@@ -326,6 +403,47 @@
                 }
             }
         };
+
+        let pressTimer;
+        const vinylTarget = document.getElementById('vinyl-target');
+
+        // 長按開始
+        vinylTarget.addEventListener('touchstart', (e) => {
+            pressTimer = setTimeout(() => {
+                createHeartBurst(e.touches[0].clientX, e.touches[0].clientY);
+                if (window.navigator.vibrate) window.navigator.vibrate([50, 50, 50]);
+            }, 1500); // 長按 1.5 秒觸發
+        });
+
+        // 放開或移動則取消
+        vinylTarget.addEventListener('touchend', () => clearTimeout(pressTimer));
+        vinylTarget.addEventListener('touchmove', () => clearTimeout(pressTimer));
+
+        // 噴發特效函式
+        function createHeartBurst(x, y) {
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️'; // 也可以換成 '❄️' 或 '🎄'
+                heart.style.position = 'fixed';
+                heart.style.left = x + 'px';
+                heart.style.top = y + 'px';
+                heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+                heart.style.transition = 'all 1s ease-out';
+                heart.style.zIndex = '20000';
+                heart.style.pointerEvents = 'none';
+                document.body.appendChild(heart);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 100 + 50;
+                
+                setTimeout(() => {
+                    heart.style.transform = `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity}px)`;
+                    heart.style.opacity = '0';
+                }, 50);
+
+                setTimeout(() => heart.remove(), 1000);
+            }
+        }
 
         function changeContent() {
             contentBox.classList.add('fade-out');
